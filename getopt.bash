@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# Copyright 2012 Aron Griffis <aron@arongriffis.com>
+# Released under the GNU GPL v3
+# Email me to request another license if needed for your project.
 
 : ${DETECT_GNU_GETOPT:=false}
 
