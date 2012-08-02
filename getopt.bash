@@ -17,20 +17,7 @@
 #  * support for -T --test (why not?)
 #  * full list of differences between this and GNU getopt (should be short)
 
-: ${DETECT_GNU_GETOPT:=false}
-
 getopt() {
-    # Don't blindly execute $DETECT_GNU_GETOPT, just test the content.
-    if [[ $DETECT_GNU_GETOPT == true ]]; then
-        # This is the official test for GNU getopt
-        command getopt -T &>/dev/null
-        if [[ $? == 4 ]]; then
-            command getopt "$@"
-            return
-        fi
-    fi
-
-    # We don't have GNU getopt. Fake it.
     if [[ "$1 $3 $5 $7" != "-o --long -n --" ]]; then
         echo "Assertion failed: getopt call changed." >&2
         return 1
