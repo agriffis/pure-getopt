@@ -3,6 +3,19 @@
 # Copyright 2012 Aron Griffis <aron@arongriffis.com>
 # Released under the GNU GPL v3
 # Email me to request another license if needed for your project.
+#
+# TODO:
+#  * proper parsing of the getopt cmdline to match GNU getopt synopses
+#  * GETOPT_COMPATIBLE
+#  * POSIXLY_CORRECT
+#  * getopt return codes
+#  * support for -a --alternative
+#  * support for -q --quiet
+#  * support for -Q --quiet-output
+#  * support for -s --shell
+#  * support for -u --unquoted
+#  * support for -T --test (why not?)
+#  * full list of differences between this and GNU getopt (should be short)
 
 : ${DETECT_GNU_GETOPT:=false}
 
