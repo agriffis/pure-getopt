@@ -8,6 +8,7 @@
 #  * all forms in the synopsis
 #  * abbreviated long options
 #  * getopt return codes
+#  * support for -a --alternative
 #  * support for -q --quiet
 #  * support for -Q --quiet-output
 #  * support for -T --test
@@ -17,8 +18,8 @@
 #  * leading + or - on options string
 #
 # TODO:
-#  * support for -a --alternative
 #  * support for -s --shell
+#  * return error status 3 on internal failure
 #  * full list of differences between this and GNU getopt
 #      * GNU getopt mishandles ambiguities:
 #          $ getopt -o '' --long xy,xz -- --x
@@ -63,8 +64,7 @@ getopt() {
     while [[ $# -gt 0 ]]; do
       case $1 in
         (-a|--alternative)
-          echo "Sorry, --alternative isn't supported by pure-getopt." >&2
-          return 2 ;;
+          flags+=a ;;
 
         (-h|--help)
           echo "Sorry, --help isn't supported by pure-getopt." >&2
@@ -197,6 +197,34 @@ getopt() {
           fi ;;
 
         (-*)
+          if [[ $flags == *a* ]]; then
+            # Alternative parsing mode!
+            # Treat it as a long option if any of the following apply:
+            #  1. There's an equals sign in the mix
+            #  2. There's more than one letter and a long match
+            #  3. There's an exact long match
+            if [[ $1 == -?? || $1 == *=* || ,$long, == *,"${1#-}"[:,]* ]]; then
+              o=$(_getopt_resolve_abbrev "-${1%%=*}" "${longarr[@]}" 2>/dev/null)
+              case $? in
+                (0|1)
+                  # Ambiguous or unambiguous match, recycle to let long
+                  # options parser handle it.
+                  if [[ $1 == *=* ]]; then
+                    set -- "$o=${1#*=}" "${@:2}"
+                  else
+                    set -- "$o" "${@:2}"
+                  fi
+                  continue ;;
+                (2)
+                  # No match, fall through to single-character check.
+                  true ;;
+                (*)
+                  echo "getopt: assertion failed (3)" >&2
+                  error=1 ;;
+              esac
+            fi
+          fi
+
           o=${1::2}
           if [[ "$short" == *"${o#-}"::* ]]; then
             if [[ ${#1} -gt 2 ]]; then
@@ -217,10 +245,19 @@ getopt() {
           elif [[ "$short" == *"${o#-}"* ]]; then
             opts+=( "$o" )
             if [[ ${#1} -gt 2 ]]; then
-              set -- "-${1:2}" "${@:2}"
+              set -- "$o" "-${1:2}" "${@:2}"
             fi
           else
-            _getopt_err "$name: unrecognized option '$o'"
+            if [[ $flags == *a* ]]; then
+              # Alternative parsing mode! Report on the entire failed
+              # option, including equals etc.
+              _getopt_err "$name: unrecognized option '$1'"
+            else
+              _getopt_err "$name: unrecognized option '$o'"
+              if [[ ${#1} -gt 2 ]]; then
+                set -- "$o" "-${1:2}" "${@:2}"
+              fi
+            fi
             error=1
           fi ;;
 
