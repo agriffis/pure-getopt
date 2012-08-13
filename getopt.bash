@@ -440,7 +440,7 @@ getopt() {
   _getopt_main "$@"
   declare status=$?
   unset -f _getopt_main _getopt_err _getopt_parse _getopt_quote \
-    _getopt_quote_csh _getopt_resolve_abbrev _getopt_split
+    _getopt_quote_csh _getopt_resolve_abbrev _getopt_split _getopt_help
   return $status
 }
 
