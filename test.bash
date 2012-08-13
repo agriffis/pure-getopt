@@ -133,7 +133,7 @@ test -a -o xy:z:: --long=abc,def:,dez:: -- -de foo
 
 title "Quoting long arguments"
 
-test -o xy:z:: --long=abc,def:,dez:: -- -y "$(<getopt.bash)"
+test -o xy:z:: --long=abc,def:,dez:: -- -y "$(head -n 200 getopt.bash)"
 
 title "Error getopt invocations"
 

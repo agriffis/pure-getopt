@@ -25,7 +25,7 @@ getopt() {
 
     if [[ $1 == [^-]* ]]; then
       # Normalize first to third synopsis form
-      flags+=c
+      flags=c$flags
       set -- -o "$1" -- "${@:2}"
     fi
 
@@ -49,7 +49,7 @@ getopt() {
     while [[ $# -gt 0 ]]; do
       case $1 in
         (-a|--alternative)
-          flags+=a ;;
+          flags=a$flags ;;
 
         (-h|--help)
           _getopt_help
@@ -57,7 +57,7 @@ getopt() {
           ;; 
 
         (-l|--longoptions)
-          long+="${long:+,}$2"
+          long="$long${long:+,}$2"
           shift ;;
 
         (-n|--name)
@@ -70,17 +70,17 @@ getopt() {
           shift ;;
 
         (-q|--quiet)
-          flags+=q ;;
+          flags=q$flags ;;
 
         (-Q|--quiet-output)
-          flags+=Q ;;
+          flags=Q$flags ;;
 
         (-s|--shell)
           case $2 in
             (sh|bash)
               flags=${flags//t/} ;;
             (csh|tcsh)
-              flags+=t ;;
+              flags=t$flags ;;
             (*)
               echo 'getopt: unknown shell after -s or --shell argument' >&2
               echo "Try \`getopt --help' for more information." >&2
@@ -88,7 +88,7 @@ getopt() {
           esac
 
         (-u|--unquoted)
-          flags+=u ;;
+          flags=u$flags ;;
 
         (-T|--test)
           return 4 ;;  # TODO: GETOPT_COMPATIBLE
@@ -119,14 +119,14 @@ getopt() {
     fi
 
     if [[ $short == -* ]]; then
-      [[ $flags == *c* ]] || flags+=i
+      [[ $flags == *c* ]] || flags=i$flgas
       short=${short#?}
     elif [[ $short == +* ]]; then
-      [[ $flags == *c* ]] || flags+=p
+      [[ $flags == *c* ]] || flags=p$flags
       short=${short#?}
     fi
-    flags+=${POSIXLY_CORRECT+p}
-    flags+=${GETOPT_COMPATIBLE+c}
+    flags=${POSIXLY_CORRECT+p}$flags
+    flags=${GETOPT_COMPATIBLE+c}$flags
 
     _getopt_parse "${name:-getopt}" "$short" "$long" "$flags" "$@" || \
       return 1
@@ -152,7 +152,7 @@ getopt() {
     while [[ $# -gt 0 ]]; do
       case $1 in
         (--)
-          params+=( "${@:2}" )
+          params=( "${params[@]}" "${@:2}" )
           break ;;
 
         (--*=*)
@@ -160,9 +160,9 @@ getopt() {
           if ! o=$(_getopt_resolve_abbrev "$o" "${longarr[@]}"); then
             error=1
           elif [[ ,"$long", == *,"${o#--}"::,* ]]; then
-            opts+=( "$o" "${1#*=}" )
+            opts=( "${opts[@]}" "$o" "${1#*=}" )
           elif [[ ,"$long", == *,"${o#--}":,* ]]; then
-            opts+=( "$o" "${1#*=}" )
+            opts=( "${opts[@]}" "$o" "${1#*=}" )
           elif [[ ,"$long", == *,"${o#--}",* ]]; then
             if $alt_recycled; then
               # GNU getopt isn't self-consistent about whether it reports
@@ -185,13 +185,13 @@ getopt() {
           if ! o=$(_getopt_resolve_abbrev "$o" "${longarr[@]}"); then
             error=1
           elif [[ ,"$long", == *,"${o#--}",* ]]; then
-            opts+=( "$o" )
+            opts=( "${opts[@]}" "$o" )
           elif [[ ,"$long", == *,"${o#--}::",* ]]; then
-            opts+=( "$o" '' )
+            opts=( "${opts[@]}" "$o" '' )
           elif [[ ,"$long", == *,"${o#--}:",* ]]; then
             if [[ $# -ge 2 ]]; then
               shift
-              opts+=( "$o" "$1" )
+              opts=( "${opts[@]}" "$o" "$1" )
             else
               _getopt_err "$name: option '$o' requires an argument"
               error=1
@@ -242,22 +242,22 @@ getopt() {
           o=${1::2}
           if [[ "$short" == *"${o#-}"::* ]]; then
             if [[ ${#1} -gt 2 ]]; then
-              opts+=( "$o" "${1:2}" )
+              opts=( "${opts[@]}" "$o" "${1:2}" )
             else
-              opts+=( "$o" '' )
+              opts=( "${opts[@]}" "$o" '' )
             fi
           elif [[ "$short" == *"${o#-}":* ]]; then
             if [[ ${#1} -gt 2 ]]; then
-              opts+=( "$o" "${1:2}" )
+              opts=( "${opts[@]}" "$o" "${1:2}" )
             elif [[ $# -ge 2 ]]; then
               shift
-              opts+=( "$o" "$1" )
+              opts=( "${opts[@]}" "$o" "$1" )
             else
               _getopt_err "$name: option requires an argument -- '${o#-}'"
               error=1
             fi
           elif [[ "$short" == *"${o#-}"* ]]; then
-            opts+=( "$o" )
+            opts=( "${opts[@]}" "$o" )
             if [[ ${#1} -gt 2 ]]; then
               set -- "$o" "-${1:2}" "${@:2}"
             fi
@@ -280,12 +280,12 @@ getopt() {
           # GNU getopt in-place mode (leading dash on short options)
           # overrides POSIXLY_CORRECT
           if [[ $flags == *i* ]]; then
-            opts+=( "$1" )
+            opts=( "${opts[@]}" "$1" )
           elif [[ $flags == *p* ]]; then
-            params+=( "$@" )
+            params=( "${params[@]}" "$@" )
             break
           else
-            params+=( "$1" )
+            params=( "${params[@]}" "$1" )
           fi
       esac
 
@@ -338,10 +338,10 @@ getopt() {
         break
       elif [[ $a == "$q"* ]]; then
         # Abbreviated match.
-        matches+=( "$a" )
+        matches=( "${matches[@]}" "$a" )
       elif [[ $flags == *a* && $q == -[^-]* && $a == -"$q"* ]]; then
         # Abbreviated alternative match.
-        matches+=( "$a" )
+        matches=( "${matches[@]}" "$a" )
       fi
     done
     case ${#matches[@]} in
