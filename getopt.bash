@@ -243,8 +243,9 @@ getopt() {
     if [[ $flags == *Q* ]]; then
       true  # generate no output
     elif [[ $flags == *[cu]* ]]; then
-      printf '%s -- %s\n' "${opts[*]}" "${params[*]}"
+      printf ' %s -- %s\n' "${opts[*]}" "${params[*]}"
     else
+      echo -n ' '
       if [[ ${#opts[@]} -gt 0 ]]; then
         printf '%q ' "${opts[@]}"
       fi
