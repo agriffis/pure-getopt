@@ -18,9 +18,9 @@
 #  * GETOPT_COMPATIBLE
 #  * POSIXLY_CORRECT
 #  * leading + or - on options string
+#  * return error status 3 on internal failure
 #
 # TODO:
-#  * return error status 3 on internal failure
 #  * full list of differences between this and GNU getopt
 #      * GNU getopt mishandles ambiguities:
 #          $ getopt -o '' --long xy,xz -- --x
@@ -56,10 +56,12 @@ getopt() {
     eval "set -- $parsed"
 
     if [[ $status != 0 ]]; then
-      echo "Try \`getopt --help' for more information." >&2
-
-      # Errors in first parse always return status 2
-      return 2
+      if [[ $status == 1 ]]; then
+        echo "Try \`getopt --help' for more information." >&2
+        # Errors in first parse always return status 2
+        status=2
+      fi
+      return $status
     fi
 
     while [[ $# -gt 0 ]]; do
@@ -189,7 +191,7 @@ getopt() {
             error=1
           else
             echo "getopt: assertion failed (1)" >&2
-            error=1
+            return 3
           fi
           alt_recycled=false
           ;;
@@ -212,7 +214,7 @@ getopt() {
             fi
           else
             echo "getopt: assertion failed (2)" >&2
-            error=1
+            return 3
           fi
           alt_recycled=false
           ;;
@@ -248,7 +250,7 @@ getopt() {
                   true ;;
                 (*)
                   echo "getopt: assertion failed (3)" >&2
-                  error=1 ;;
+                  return 3 ;;
               esac
             fi
           fi
