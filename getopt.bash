@@ -1,32 +1,13 @@
 #!/bin/bash
-#
-# Copyright 2012 Aron Griffis <aron@arongriffis.com>
-# Released under the GNU GPL v3
-# Email me to request another license if needed for your project.
-#
-# DONE:
-#  * all forms in the synopsis
-#  * abbreviated long options
-#  * getopt return codes
-#  * support for -a --alternative
-#  * support for -h --help
-#  * support for -q --quiet
-#  * support for -Q --quiet-output
-#  * support for -s --shell
-#  * support for -T --test
-#  * support for -u --unquoted
-#  * GETOPT_COMPATIBLE
-#  * POSIXLY_CORRECT
-#  * leading + or - on options string
-#  * return error status 3 on internal failure
-#
-# TODO:
-#  * full list of differences between this and GNU getopt
-#      * GNU getopt mishandles ambiguities:
-#          $ getopt -o '' --long xy,xz -- --x
-#           --xy --
 
 getopt() {
+  # pure-getopt, a drop-in replacement for GNU getopt in pure Bash.
+  # version 1.0
+  #
+  # Copyright 2012 Aron Griffis <aron@arongriffis.com>
+  # Released under the GNU GPL v3
+  # Email me to request another license if needed for your project.
+
   _getopt_main() {
     declare parsed status
     declare short long name flags
@@ -111,7 +92,7 @@ getopt() {
           return 4 ;;  # TODO: GETOPT_COMPATIBLE
 
         (-V|--version)
-          echo "pure-getopt 0.1"
+          echo "pure-getopt 1.0"
           return 0 ;;
 
         (--)
