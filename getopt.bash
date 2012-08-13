@@ -11,6 +11,7 @@ getopt() {
   _getopt_main() {
     declare parsed status
     declare short long name flags
+    declare have_short=false
 
     # Synopsis from getopt man-page:
     #
@@ -65,6 +66,7 @@ getopt() {
 
         (-o|--options)
           short=$2
+          have_short=true
           shift ;;
 
         (-q|--quiet)
@@ -103,7 +105,7 @@ getopt() {
       shift
     done
 
-    if [[ -z ${short+isset} ]]; then
+    if ! $have_short; then
       # $short was declared but never set, not even to an empty string.
       # This implies the second form in the synopsis.
       if [[ $# == 0 ]]; then
@@ -112,6 +114,7 @@ getopt() {
         return 2
       fi
       short=$1
+      have_short=true
       shift
     fi
 
