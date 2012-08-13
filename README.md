@@ -22,9 +22,13 @@ faithfully reimplements GNU getopt features, including:
 
 # How to use it
 
-Cut and paste the entire function into your script.  Then call "getopt" as
-you already were, except now it runs getopt internally instead of calling
-to an external binary.
+Cut and paste the entire function into your script, prior to calling
+"getopt". Done! :-)
+
+I don't recommend sourcing getopt.bash into your script. The problem is
+that you've just traded a dependency on GNU getopt for a dependency on
+pure-getopt. Most of the time it should be okay to just insert the function
+directly in your script.
 
 If you have a long script and you'd rather put the getopt function at the
 bottom rather than the top, this pattern might be useful:
