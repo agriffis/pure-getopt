@@ -9,6 +9,7 @@
 #  * abbreviated long options
 #  * getopt return codes
 #  * support for -a --alternative
+#  * support for -h --help
 #  * support for -q --quiet
 #  * support for -Q --quiet-output
 #  * support for -s --shell
@@ -67,8 +68,9 @@ getopt() {
           flags+=a ;;
 
         (-h|--help)
-          echo "Sorry, --help isn't supported by pure-getopt." >&2
-          return 2 ;;
+          _getopt_help
+          return 2  # as does GNU getopt
+          ;; 
 
         (-l|--longoptions)
           long+="${long:+,}$2"
@@ -407,6 +409,30 @@ getopt() {
       echo -n \'
       space=' '
     done
+  }
+
+  _getopt_help() {
+    cat <<-EOT >&2
+	
+	Usage:
+	 getopt optstring parameters
+	 getopt [options] [--] optstring parameters
+	 getopt [options] -o|--options optstring [options] [--] parameters
+	
+	Options:
+	 -a, --alternative            Allow long options starting with single -
+	 -h, --help                   This small usage guide
+	 -l, --longoptions <longopts> Long options to be recognized
+	 -n, --name <progname>        The name under which errors are reported
+	 -o, --options <optstring>    Short options to be recognized
+	 -q, --quiet                  Disable error reporting by getopt(3)
+	 -Q, --quiet-output           No normal output
+	 -s, --shell <shell>          Set shell quoting conventions
+	 -T, --test                   Test for getopt(1) version
+	 -u, --unquote                Do not quote the output
+	 -V, --version                Output version information
+	
+	EOT
   }
 
   _getopt_main "$@"

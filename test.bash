@@ -109,6 +109,13 @@ test -o xy:z:: --long=abc,def:,dez:: -- --de
 test -o xy:z:: --long=abc,def:,dez:: -- --de=foo
 test -o xy:z:: --long=abc,def:,dez:: -- --de foo
 
+title "Empty command lines"
+
+test -o xy:z:: --long=abc,def:,dez::
+test -o xy:z:: --long=abc,def:,dez:: --
+test -o xy:z:: --long=abc,def:,dez:: -- foo
+test -o xy:z:: --long=abc,def:,dez:: -- foo bar
+
 title "Alternative parsing"
 
 test -a -o xy:z:: --long=abc,def:,dez:: -- -xyz -abc
@@ -130,12 +137,9 @@ test -a -o xy:z:: --long=abc,def:,dez:: -- -de
 test -a -o xy:z:: --long=abc,def:,dez:: -- -de=foo
 test -a -o xy:z:: --long=abc,def:,dez:: -- -de foo
 
-title "Empty command lines"
+title "Quoting long arguments"
 
-test -o xy:z:: --long=abc,def:,dez::
-test -o xy:z:: --long=abc,def:,dez:: --
-test -o xy:z:: --long=abc,def:,dez:: -- foo
-test -o xy:z:: --long=abc,def:,dez:: -- foo bar
+test -o xy:z:: --long=abc,def:,dez:: -- -y "$(<getopt.bash)"
 
 title "Error getopt invocations"
 
@@ -144,8 +148,9 @@ test -o
 test --
 test --long=foo
 
-title "Quoting long arguments"
+title "Getopt help"
 
-test -o xy:z:: --long=abc,def:,dez:: -- -y "$(<getopt.bash)"
+test -h
+test --help
 
 # vim:sw=2
