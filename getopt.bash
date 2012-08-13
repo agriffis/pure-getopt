@@ -5,18 +5,18 @@
 # Email me to request another license if needed for your project.
 #
 # DONE:
+#  * all forms in the synopsis
 #  * abbreviated long options
 #  * getopt return codes
 #  * support for -q --quiet
 #  * support for -Q --quiet-output
 #  * support for -T --test
 #  * support for -u --unquoted
+#  * GETOPT_COMPATIBLE
 #  * POSIXLY_CORRECT
 #  * leading + or - on options string
 #
 # TODO:
-#  * first and second calling form in the synopsis
-#  * GETOPT_COMPATIBLE
 #  * support for -a --alternative
 #  * support for -s --shell
 #  * full list of differences between this and GNU getopt
@@ -25,7 +25,7 @@
 #           --xy --
 
 getopt() {
-  _getopt() {
+  _getopt_main() {
     declare parsed status
     declare short long name flags
 
@@ -35,10 +35,18 @@ getopt() {
     #   getopt [options] [--] optstring parameters
     #   getopt [options] -o|--options optstring [options] [--] parameters
     #
-    # Note that although the last synopsis shows the double-dash as
-    # optional, it's only optional if there's a non-option parameter at the
-    # start of the parameter list.
+    # The first form can be normalized to the third form which
+    # _getopt_parse() understands. The second form can be recognized after
+    # first parse when $short hasn't been set.
 
+    if [[ $1 != -* ]]; then
+      # Normalize first to third synopsis form
+      flags+=c
+      set -- -o "$1" -- "${@:2}"
+    fi
+
+    # First parse always uses flags=p since getopt always parses its own
+    # arguments effectively in this mode.
     parsed=$(_getopt_parse getopt ahl:n:o:qQs:TuV \
       alternative,help,longoptions:,name,options:,quiet,quiet-output,shell:,test,version \
       p "$@")
@@ -102,20 +110,34 @@ getopt() {
       shift
     done
 
+    if [[ -z ${short+isset} ]]; then
+      # $short was declared but never set, not even to an empty string.
+      # This implies the second form in the synopsis.
+      if [[ $# == 0 ]]; then
+        echo 'getopt: missing optstring argument' >&2
+        echo "Try \`getopt --help' for more information." >&2
+        return 2
+      fi
+      short=$1
+      shift
+    fi
+
     if [[ $short == -* ]]; then
-      flags+=i
+      [[ $flags == *c* ]] || flags+=i
       short=${short#?}
     elif [[ $short == +* ]]; then
-      flags+=p
+      [[ $flags == *c* ]] || flags+=p
       short=${short#?}
     fi
     flags+=${POSIXLY_CORRECT+p}
+    flags+=${GETOPT_COMPATIBLE+c}
 
-    _getopt_parse "$name" "$short" "$long" "$flags" "$@"
+    _getopt_parse "${name:-getopt}" "$short" "$long" "$flags" "$@" || \
+      return 1
   }
 
   _getopt_parse() {
-    # Inner getopt parser, used for both getopt parse and program parse.
+    # Inner getopt parser, used for both first parse and second parse.
     declare name="$1" short="$2" long="$3" flags="$4"
     shift 4
 
@@ -220,7 +242,7 @@ getopt() {
 
     if [[ $flags == *Q* ]]; then
       true  # generate no output
-    elif [[ $flags == *u* ]]; then
+    elif [[ $flags == *[cu]* ]]; then
       printf '%s -- %s\n' "${opts[*]}" "${params[*]}"
     else
       if [[ ${#opts[@]} -gt 0 ]]; then
@@ -246,7 +268,7 @@ getopt() {
     # Resolves an abbrevation from a list of possibilities.
     # If the abbreviation is unambiguous, echoes the expansion on stdout
     # and returns 0.  If the abbreviation is ambiguous, prints a message on
-    # stderr and returns 1. (For getopt parse this should convert to exit
+    # stderr and returns 1. (For first parse this should convert to exit
     # status 2.)  If there is no match at all, prints a message on stderr
     # and returns 2.
     declare a q="$1"
@@ -278,17 +300,16 @@ getopt() {
 
   _getopt_quote() {
     # Quotes arguments with single quotes, escaping inner single quotes
-    # appropriately.
-    declare i q=\'
+    declare i q=\' space=
     for ((i=1; i<=$#; i++)); do
-      (( i > 1 )) && echo -n ' '
-      printf "'%s'" "${!i//$q/$q\\$q$q}"
+      printf "$space'%s'" "${!i//$q/$q\\$q$q}"
+      space=' '
     done
   }
 
-  _getopt "$@"
+  _getopt_main "$@"
   declare status=$?
-  unset -f _getopt _getopt_parse _getopt_quote _getopt_resolve_abbrev _getopt_split
+  unset -f _getopt_main _getopt_err _getopt_parse _getopt_quote _getopt_resolve_abbrev _getopt_split
   return $status
 }
 
