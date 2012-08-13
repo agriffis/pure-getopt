@@ -102,6 +102,8 @@ test -o xy:z:: --long=abc,def:,dez:: -- --ab foo
 test -o xy:z:: --long=abc,def:,dez:: -- --de
 test -o xy:z:: --long=abc,def:,dez:: -- --de=foo
 test -o xy:z:: --long=abc,def:,dez:: -- --de foo
+# Test exact match against partial match
+test -o '' --long=abc,abcd -- --abc
 
 title "Empty command lines"
 
@@ -121,6 +123,8 @@ test -a -o xy:z:: --long=abc,def:,dez:: -- -xyz -def foo
 test -a -o xy:z:: --long=abc,def:,dez:: -- -xyz -dez
 test -a -o xy:z:: --long=abc,def:,dez:: -- -xyz -dez=foo
 test -a -o xy:z:: --long=abc,def:,dez:: -- -xyz -dez foo
+# Test exact match against partial match
+test -a -o '' --long=abc,abcd -- -abc
 
 title "Alternative parsing abbreviated long options"
 

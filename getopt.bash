@@ -2,7 +2,7 @@
 
 getopt() {
   # pure-getopt, a drop-in replacement for GNU getopt in pure Bash.
-  # version 1.1
+  # version 1.2
   #
   # Copyright 2012 Aron Griffis <aron@arongriffis.com>
   # Released under the GNU GPL v3
@@ -94,7 +94,7 @@ getopt() {
           return 4 ;;  # TODO: GETOPT_COMPATIBLE
 
         (-V|--version)
-          echo "pure-getopt 1.1"
+          echo "pure-getopt 1.2"
           return 0 ;;
 
         (--)
@@ -332,7 +332,7 @@ getopt() {
         # Exact match. Squash any other partial matches.
         matches=( "$a" )
         break
-      elif [[ $flags == *a* && $q == -[^-]* && $q == -"$a" ]]; then
+      elif [[ $flags == *a* && $q == -[^-]* && $a == -"$q" ]]; then
         # Exact alternative match. Squash any other partial matches.
         matches=( "$a" )
         break
