@@ -11,6 +11,7 @@
 #  * support for -a --alternative
 #  * support for -q --quiet
 #  * support for -Q --quiet-output
+#  * support for -s --shell
 #  * support for -T --test
 #  * support for -u --unquoted
 #  * GETOPT_COMPATIBLE
@@ -18,7 +19,6 @@
 #  * leading + or - on options string
 #
 # TODO:
-#  * support for -s --shell
 #  * return error status 3 on internal failure
 #  * full list of differences between this and GNU getopt
 #      * GNU getopt mishandles ambiguities:
@@ -89,8 +89,16 @@ getopt() {
           flags+=Q ;;
 
         (-s|--shell)
-          echo "Sorry, --shell isn't supported yet by pure-getopt." >&2
-          return 2 ;;
+          case $2 in
+            (sh|bash)
+              flags=${flags//t/} ;;
+            (csh|tcsh)
+              flags+=t ;;
+            (*)
+              echo 'getopt: unknown shell after -s or --shell argument' >&2
+              echo "Try \`getopt --help' for more information." >&2
+              return 2 ;;
+          esac
 
         (-u|--unquoted)
           flags+=u ;;
@@ -279,16 +287,22 @@ getopt() {
 
     if [[ $flags == *Q* ]]; then
       true  # generate no output
-    elif [[ $flags == *[cu]* ]]; then
-      printf ' %s -- %s\n' "${opts[*]}" "${params[*]}"
     else
       echo -n ' '
-      if [[ ${#opts[@]} -gt 0 ]]; then
-        printf '%q ' "${opts[@]}"
-      fi
-      printf '%s' '--'
-      if [[ ${#params[@]} -gt 0 ]]; then
-        printf ' %q' "${params[@]}"
+      if [[ $flags == *[cu]* ]]; then
+        printf '%s -- %s' "${opts[*]}" "${params[*]}"
+      else
+        if [[ $flags == *t* ]]; then
+          _getopt_quote_csh "${opts[@]}"
+        else
+          _getopt_quote "${opts[@]}"
+        fi
+        printf '%s' --
+        if [[ $flags == *t* ]]; then
+          _getopt_quote_csh "${params[@]}"
+        else
+          _getopt_quote "${params[@]}"
+        fi
       fi
       echo
     fi
@@ -338,16 +352,39 @@ getopt() {
 
   _getopt_quote() {
     # Quotes arguments with single quotes, escaping inner single quotes
-    declare i q=\' space=
-    for ((i=1; i<=$#; i++)); do
-      printf "$space'%s'" "${!i//$q/$q\\$q$q}"
+    declare s space q=\'
+    for s; do
+      printf "$space'%s'" "${s//$q/$q\\$q$q}"
+      space=' '
+    done
+  }
+
+  _getopt_quote_csh() {
+    # Quotes arguments with single quotes, escaping inner single quotes,
+    # bangs, backslashes and newlines
+    declare s i c space
+    for s; do
+      echo -n "$space'"
+      for ((i=0; i<${#s}; i++)); do
+        c=${s:i:1}
+        case $c in
+          (\\|\'|!)
+            echo -n "'\\$c'" ;;
+          ($'\n')
+            echo -n "\\$c" ;;
+          (*)
+            echo -n "$c" ;;
+        esac
+      done
+      echo -n \'
       space=' '
     done
   }
 
   _getopt_main "$@"
   declare status=$?
-  unset -f _getopt_main _getopt_err _getopt_parse _getopt_quote _getopt_resolve_abbrev _getopt_split
+  unset -f _getopt_main _getopt_err _getopt_parse _getopt_quote \
+    _getopt_quote_csh _getopt_resolve_abbrev _getopt_split
   return $status
 }
 
