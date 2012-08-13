@@ -7,8 +7,8 @@ Are you tired of telling them to install GNU getopt from MacPorts, Fink or
 HomeBrew, just to run your script?
 
 This is the problem that pure-getopt solves. It's a drop-in replacement for
-GNU getopt, implemented in pure Bash. It makes no external calls and
-faithfully reimplements GNU getopt features, including:
+GNU getopt, implemented in pure Bash compatible back to 2.05b. It makes no
+external calls and faithfully reimplements GNU getopt features, including:
 
  * all three calling forms in the synopsis
  * all getopt options
