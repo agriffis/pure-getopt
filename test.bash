@@ -51,14 +51,8 @@ test() {
         "$myerr" == *ambiguous* && \
         "$myerr" == "${referr/=* is /$q is }" ]]; then
     # Intentional difference between GNU getopt and pure-getopt:
-    # gnu:  getopt: option '--de=foo' is ambiguous; possibilities: '--def'
-    # pure: getopt: option '--de' is ambiguous; possibilities: '--def'
-    echo PASS
-  elif [[ "$mystatus" == "$refstatus" && \
-        "$mynorm" == "$refnorm" && \
-        "$myerr" == "${referr//invalid/unrecognized}" ]]; then
-    # For no apparent reason, GNU getopt sometimes uses "invalid option"
-    # instead of "unrecognized option"
+    # gnu:  getopt: option '--x=foo' is ambiguous; possibilities: '--xy' '--xz'
+    # pure: getopt: option '--x' is ambiguous; possibilities: '--xy' '--xz'
     echo PASS
   else
     echo FAIL
