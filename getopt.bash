@@ -40,7 +40,7 @@ getopt() {
     # _getopt_parse() understands. The second form can be recognized after
     # first parse when $short hasn't been set.
 
-    if [[ $1 != -* ]]; then
+    if [[ $1 == [^-]* ]]; then
       # Normalize first to third synopsis form
       flags+=c
       set -- -o "$1" -- "${@:2}"
@@ -159,7 +159,7 @@ getopt() {
 
     # Parse and collect options and parameters
     declare -a opts params
-    declare o error=0
+    declare o alt_recycled=false error=0
 
     while [[ $# -gt 0 ]]; do
       case $1 in
@@ -172,16 +172,25 @@ getopt() {
           if ! o=$(_getopt_resolve_abbrev "$o" "${longarr[@]}"); then
             error=1
           elif [[ ,"$long", == *,"${o#--}"::,* ]]; then
-            opts+=( "$o" "${o#*=}" )
+            opts+=( "$o" "${1#*=}" )
           elif [[ ,"$long", == *,"${o#--}":,* ]]; then
-            opts+=( "$o" "${o#*=}" )
+            opts+=( "$o" "${1#*=}" )
           elif [[ ,"$long", == *,"${o#--}",* ]]; then
-            _getopt_err "$name: option '$o' doesn't allow an argument"
+            if $alt_recycled; then
+              # GNU getopt isn't self-consistent about whether it reports
+              # errors with a single dash or double dash in alternative
+              # mode, but in this case it reports with a single dash.
+              _getopt_err "$name: option '${o#-}' doesn't allow an argument"
+            else
+              _getopt_err "$name: option '$o' doesn't allow an argument"
+            fi
             error=1
           else
             echo "getopt: assertion failed (1)" >&2
             error=1
-          fi ;;
+          fi
+          alt_recycled=false
+          ;;
 
         (--?*)
           o=$1
@@ -202,26 +211,35 @@ getopt() {
           else
             echo "getopt: assertion failed (2)" >&2
             error=1
-          fi ;;
+          fi
+          alt_recycled=false
+          ;;
 
         (-*)
           if [[ $flags == *a* ]]; then
             # Alternative parsing mode!
-            # Treat it as a long option if any of the following apply:
-            #  1. There's an equals sign in the mix
-            #  2. There's more than one letter and a long match
-            #  3. There's an exact long match
-            if [[ $1 == -?? || $1 == *=* || ,$long, == *,"${1#-}"[:,]* ]]; then
-              o=$(_getopt_resolve_abbrev "-${1%%=*}" "${longarr[@]}" 2>/dev/null)
+            # Try to handle as a long option if any of the following apply:
+            #  1. There's an equals sign in the mix -x=3 or -xy=3
+            #  2. There's 2+ letters and an abbreviated long match -xy
+            #  3. There's a single letter and an exact long match
+            #  4. There's a single letter and no short match
+            o=${1::2} # temp for testing #4
+            if [[ $1 == *=* || $1 == -?? || \
+                  ,$long, == *,"${1#-}"[:,]* || \
+                  ,$short, != *,"${o#-}"[:,]* ]]; then
+              o=$(_getopt_resolve_abbrev "${1%%=*}" "${longarr[@]}" 2>/dev/null)
               case $? in
-                (0|1)
-                  # Ambiguous or unambiguous match, recycle to let long
-                  # options parser handle it.
-                  if [[ $1 == *=* ]]; then
-                    set -- "$o=${1#*=}" "${@:2}"
-                  else
-                    set -- "$o" "${@:2}"
-                  fi
+                (0)
+                  # Unambiguous match. Let the long options parser handle
+                  # it, with a flag to get the right error message.
+                  set -- "-$@"
+                  alt_recycled=true
+                  continue ;;
+                (1)
+                  # Ambiguous match, generate error and continue.
+                  _getopt_resolve_abbrev "${1%%=*}" "${longarr[@]}" >/dev/null
+                  error=1
+                  shift
                   continue ;;
                 (2)
                   # No match, fall through to single-character check.
@@ -247,7 +265,7 @@ getopt() {
               shift
               opts+=( "$o" "$1" )
             else
-              _getopt_err "$name: option '$o' requires an argument"
+              _getopt_err "$name: option requires an argument -- '${o#-}'"
               error=1
             fi
           elif [[ "$short" == *"${o#-}"* ]]; then
@@ -258,10 +276,11 @@ getopt() {
           else
             if [[ $flags == *a* ]]; then
               # Alternative parsing mode! Report on the entire failed
-              # option, including equals etc.
-              _getopt_err "$name: unrecognized option '$1'"
+              # option. GNU includes =value but we omit it for sanity with
+              # very long values.
+              _getopt_err "$name: unrecognized option '${1%%=*}'"
             else
-              _getopt_err "$name: unrecognized option '$o'"
+              _getopt_err "$name: invalid option -- '${o#-}'"
               if [[ ${#1} -gt 2 ]]; then
                 set -- "$o" "-${1:2}" "${@:2}"
               fi
@@ -293,15 +312,9 @@ getopt() {
         printf '%s -- %s' "${opts[*]}" "${params[*]}"
       else
         if [[ $flags == *t* ]]; then
-          _getopt_quote_csh "${opts[@]}"
+          _getopt_quote_csh "${opts[@]}" -- "${params[@]}"
         else
-          _getopt_quote "${opts[@]}"
-        fi
-        printf '%s' --
-        if [[ $flags == *t* ]]; then
-          _getopt_quote_csh "${params[@]}"
-        else
-          _getopt_quote "${params[@]}"
+          _getopt_quote "${opts[@]}" -- "${params[@]}"
         fi
       fi
       echo
@@ -327,17 +340,32 @@ getopt() {
     declare -a matches
     shift
     for a; do
-      [[ "$a" == "$q" ]] && { matches=( "$a" ); break; }
-      [[ "$a" == "$q"* ]] && matches+=( "$a" )
+      if [[ $q == "$a" ]]; then
+        # Exact match. Squash any other partial matches.
+        matches=( "$a" )
+        break
+      elif [[ $flags == *a* && $q == -[^-]* && $q == -"$a" ]]; then
+        # Exact alternative match. Squash any other partial matches.
+        matches=( "$a" )
+        break
+      elif [[ $a == "$q"* ]]; then
+        # Abbreviated match.
+        matches+=( "$a" )
+      elif [[ $flags == *a* && $q == -[^-]* && $a == -"$q"* ]]; then
+        # Abbreviated alternative match.
+        matches+=( "$a" )
+      fi
     done
     case ${#matches[@]} in
       (0)
+        [[ $flags == *q* ]] || \
         printf "$name: unrecognized option %s\n" >&2 \
           "$(_getopt_quote "$q")"
         return 2 ;;
       (1)
-        echo "$matches"; return 0 ;;
+        printf '%s' "$matches"; return 0 ;;
       (*) 
+        [[ $flags == *q* ]] || \
         printf "$name: option %s is ambiguous; possibilities: %s\n" >&2 \
           "$(_getopt_quote "$q")" "$(_getopt_quote "${matches[@]}")"
         return 1 ;;
