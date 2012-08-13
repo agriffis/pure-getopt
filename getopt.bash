@@ -421,10 +421,27 @@ getopt() {
 	EOT
   }
 
+  _getopt_version_check() {
+    if [[ -z $BASH_VERSION ]]; then
+      echo "getopt: unknown version of bash might not be compatible" >&2
+      return 1
+    fi
+
+    # This is a lexical comparison that should be sufficient forever.
+    if [[ $BASH_VERSION < 2.05b ]]; then
+      echo "getopt: bash $BASH_VERSION might not be compatible" >&2
+      return 1
+    fi
+
+    return 0
+  }
+
+  _getopt_version_check
   _getopt_main "$@"
   declare status=$?
   unset -f _getopt_main _getopt_err _getopt_parse _getopt_quote \
-    _getopt_quote_csh _getopt_resolve_abbrev _getopt_split _getopt_help
+    _getopt_quote_csh _getopt_resolve_abbrev _getopt_split _getopt_help \
+    _getopt_version_check
   return $status
 }
 
