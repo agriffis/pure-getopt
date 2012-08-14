@@ -22,7 +22,9 @@ test() {
     declare t="$*"
     t=${t%%$nl*}
     [[ ${#t} -gt 68 ]] && t="${t::65}..."
-    printf "%3s. Testing %s " "$((num++))" "$t"
+    printf "%3s. Testing %s%s " "$((num++))" \
+      "${GETOPT_COMPATIBLE+GETOPT_COMPATIBLE }${POSIXLY_CORRECT+POSIXLY_CORRECT }" \
+      "$t"
   else
     (( num++ ))
     return
@@ -150,5 +152,12 @@ title "Getopt help"
 
 test -h
 test --help
+
+title "-T test for getopt version"
+
+test -T
+GETOPT_COMPATIBLE=1 test -T
+# GETOPT_COMPATIBLE empty string should work too
+GETOPT_COMPATIBLE= test -T
 
 # vim:sw=2

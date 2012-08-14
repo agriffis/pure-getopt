@@ -2,7 +2,7 @@
 
 getopt() {
   # pure-getopt, a drop-in replacement for GNU getopt in pure Bash.
-  # version 1.2
+  # version 1.3
   #
   # Copyright 2012 Aron Griffis <aron@arongriffis.com>
   # Released under the GNU GPL v3
@@ -33,9 +33,10 @@ getopt() {
     # _getopt_parse() understands. The second form can be recognized after
     # first parse when $short hasn't been set.
 
-    if [[ $1 == [^-]* ]]; then
-      # Normalize first to third synopsis form
+    if [[ -n ${GETOPT_COMPATIBLE+isset} || $1 == [^-]* ]]; then
+      # Enable compatibility mode
       flags=c$flags
+      # Normalize first to third synopsis form
       set -- -o "$1" -- "${@:2}"
     fi
 
@@ -100,10 +101,10 @@ getopt() {
           flags=u$flags ;;
 
         (-T|--test)
-          return 4 ;;  # TODO: GETOPT_COMPATIBLE
+          return 4 ;;
 
         (-V|--version)
-          echo "pure-getopt 1.2"
+          echo "pure-getopt 1.3"
           return 0 ;;
 
         (--)
@@ -128,12 +129,19 @@ getopt() {
     fi
 
     if [[ $short == -* ]]; then
+      # Leading dash means generate output in place rather than reordering,
+      # unless we're already in compatibility mode.
       [[ $flags == *c* ]] || flags=i$flgas
       short=${short#?}
     elif [[ $short == +* ]]; then
+      # Leading plus means POSIXLY_CORRECT, unless we're already in
+      # compatibility mode.
       [[ $flags == *c* ]] || flags=p$flags
       short=${short#?}
     fi
+
+    # These tests should fire if the variables are in the environment, even
+    # if an empty string.  That's the difference between :+ and +
     flags=${POSIXLY_CORRECT+p}$flags
     flags=${GETOPT_COMPATIBLE+c}$flags
 
@@ -149,7 +157,7 @@ getopt() {
     # $flags is a string of characters with the following meanings:
     #   a - alternative parsing mode
     #   c - GETOPT_COMPATIBLE
-    #   i - generate output in order rather than reordering
+    #   i - generate output in place rather than reordering
     #   p - POSIXLY_CORRECT
     #   q - disable error reporting
     #   Q - disable normal output
