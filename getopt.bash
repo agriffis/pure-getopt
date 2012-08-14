@@ -9,6 +9,16 @@ getopt() {
   # Email me to request another license if needed for your project.
 
   _getopt_main() {
+    # Returns one of the following statuses:
+    #   0 success
+    #   1 error parsing parameters
+    #   2 error in getopt invocation
+    #   3 internal error
+    #   4 reserved for -T
+    #
+    # For statuses 0 and 1, generates normalized and shell-quoted
+    # "options -- parameters" on stdout.
+
     declare parsed status
     declare short long name flags
     declare have_short=false
@@ -38,7 +48,7 @@ getopt() {
     if [[ $status != 0 ]]; then
       if [[ $status == 1 ]]; then
         echo "Try \`getopt --help' for more information." >&2
-        # Errors in first parse always return status 2
+        # Since this is the first parse, convert status 1 to 2
         status=2
       fi
       return $status
@@ -127,12 +137,25 @@ getopt() {
     flags=${POSIXLY_CORRECT+p}$flags
     flags=${GETOPT_COMPATIBLE+c}$flags
 
-    _getopt_parse "${name:-getopt}" "$short" "$long" "$flags" "$@" || \
-      return 1
+    _getopt_parse "${name:-getopt}" "$short" "$long" "$flags" "$@"
   }
 
   _getopt_parse() {
     # Inner getopt parser, used for both first parse and second parse.
+    # Returns 0 for success, 1 for error parsing, 3 for internal error.
+    # In the case of status 1, still generates stdout with whatever could
+    # be parsed.
+    #
+    # $flags is a string of characters with the following meanings:
+    #   a - alternative parsing mode
+    #   c - GETOPT_COMPATIBLE
+    #   i - generate output in order rather than reordering
+    #   p - POSIXLY_CORRECT
+    #   q - disable error reporting
+    #   Q - disable normal output
+    #   t - quote for csh/tcsh
+    #   u - unquoted output
+
     declare name="$1" short="$2" long="$3" flags="$4"
     shift 4
 
