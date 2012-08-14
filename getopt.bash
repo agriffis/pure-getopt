@@ -35,8 +35,6 @@ getopt() {
       alternative,help,longoptions:,name,options:,quiet,quiet-output,shell:,test,version \
       p "$@")
     status=$?
-    eval "set -- $parsed"
-
     if [[ $status != 0 ]]; then
       if [[ $status == 1 ]]; then
         echo "Try \`getopt --help' for more information." >&2
@@ -45,6 +43,7 @@ getopt() {
       fi
       return $status
     fi
+    eval "set -- $parsed"
 
     while [[ $# -gt 0 ]]; do
       case $1 in
