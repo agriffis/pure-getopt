@@ -140,10 +140,9 @@ getopt() {
       short=${short#?}
     fi
 
-    # These tests should fire if the variables are in the environment, even
-    # if an empty string.  That's the difference between :+ and +
+    # This should fire if POSIXLY_CORRECT is in the environment, even if
+    # it's an empty string.  That's the difference between :+ and +
     flags=${POSIXLY_CORRECT+p}$flags
-    flags=${GETOPT_COMPATIBLE+c}$flags
 
     _getopt_parse "${name:-getopt}" "$short" "$long" "$flags" "$@"
   }
