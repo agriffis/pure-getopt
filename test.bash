@@ -2,12 +2,22 @@
 
 source getopt.bash
 
-normeval() {
+evalbash() {
   eval "set -- $1"
   if [[ $# -gt 0 ]]; then
     printf '%q ' % "$@"
     echo
   fi
+}
+
+evalcsh() {
+  ARGS=$1 tcsh -c '
+    eval set argv = \( $ARGS:q \)
+    echo $1:q
+    echo $2:q
+    echo $3:q
+    echo $4:q
+    '
 }
 
 want=$1
@@ -16,7 +26,7 @@ num=1
 test() {
   declare myout myerr mynorm mystatus
   declare refout referr refnorm refstatus
-  declare q=\' nl=$'\n'
+  declare q=\' nl=$'\n' evalnorm=evalbash
 
   if [[ -z $want || $want -eq $num ]]; then
     declare t="$*"
@@ -30,18 +40,19 @@ test() {
     return
   fi
 
+  if [[ "$1 $2" == '-s csh' || "$1 $2" == '-s tcsh' ]]; then
+    evalnorm=evalcsh
+  fi
+
   refout=$(command getopt "$@" 2>/dev/null)
   refstatus=$?
   referr=$(command getopt "$@" 2>&1 >/dev/null)
-  refnorm=$(normeval "$refout")
+  refnorm=$($evalnorm "$refout")
 
-# set -x
-# getopt "$@"
-# exit
   myout=$(getopt "$@" 2>/dev/null)
   mystatus=$?
   myerr=$(getopt "$@" 2>&1 >/dev/null)
-  mynorm=$(normeval "$myout")
+  mynorm=$($evalnorm "$myout")
 
   if [[ "$mystatus" == "$refstatus" && \
         "$mynorm" == "$refnorm" && \
@@ -153,11 +164,22 @@ title "Getopt help"
 test -h
 test --help
 
-title "-T test for getopt version"
+title "Getopt version with -T"
 
 test -T
 GETOPT_COMPATIBLE=1 test -T
 # GETOPT_COMPATIBLE empty string should work too
 GETOPT_COMPATIBLE= test -T
+
+title "Setting shell with -s"
+
+test -s sh -o xy:z:: --long=abc,def:,dez:: -- -x -y a\\b\ c
+test -s bash -o xy:z:: --long=abc,def:,dez:: -- -x -y a\\b\ c
+test -s foo -o xy:z:: --long=abc,def:,dez:: -- -x -y a\\b\ c
+
+if type tcsh &>/dev/null; then
+  test -s csh -o xy:z:: --long=abc,def:,dez:: -- -x -y a\\b\ c
+  test -s tcsh -o xy:z:: --long=abc,def:,dez:: -- -x -y a\\b\ c
+fi
 
 # vim:sw=2
