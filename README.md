@@ -29,28 +29,30 @@ directly in your script.
 If you have a long script and you'd rather put the getopt function at the
 bottom rather than the top, this pattern might be useful:
 
-    #!/bin/bash
+```bash
+#!/bin/bash
 
-    main() {
-        declare argv
-        argv=$(getopt -o xy:z:: --long foo,bar:,baz:: -- "$@") || return
-        eval "set -- $argv"
+main() {
+    declare argv
+    argv=$(getopt -o xy:z:: --long foo,bar:,baz:: -- "$@") || return
+    eval "set -- $argv"
 
-        declare a
-        for a; do
-            case $a in
-                ...
-            esac
-        done
-    }
+    declare a
+    for a; do
+        case $a in
+            ...
+        esac
+    done
+}
 
-    # INSERT getopt function here
-    getopt() {
-        ...
-    }
+# INSERT getopt function here
+getopt() {
+    ...
+}
 
-    # CALL main at very bottom, passing script args
-    main "$@"
+# CALL main at very bottom, passing script args
+main "$@"
+```
 
 # Differences between pure-getopt and GNU getopt
 
@@ -90,8 +92,3 @@ either inconsequential or due to bugs in GNU getopt:
 # References
 
  * [getopt in util-linux](http://software.frodo.looijaard.name/getopt/)
- * [bigeasy's getopt](https://github.com/bigeasy/getopt) -- another
-   pure Bash implementation. I checked into it before writing pure-getopt 
-   but quickly ran into issues. The coding style is pretty different from
-   what I prefer, so I thought I had a better chance of success starting
-   from scratch.
