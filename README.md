@@ -18,16 +18,10 @@ reimplements GNU getopt features, including:
 
 # How to use it
 
-Cut and paste the entire function into your script, prior to calling
-"getopt". Done! :-)
-
-I don't recommend sourcing getopt.bash into your script. The problem is
-that you've just traded a dependency on GNU getopt for a dependency on
-pure-getopt. Most of the time it should be okay to just insert the function
-directly in your script.
-
-If you have a long script and you'd rather put the getopt function at the
-bottom rather than the top, this pattern might be useful:
+pure-getopt provides a single bash function `getopt` that you can insert
+directly into your script. It should be defined before calling `getopt` from
+your code, so either place the definition above your code, or use the
+recommended pattern below.
 
 ```bash
 #!/bin/bash
@@ -50,8 +44,11 @@ getopt() {
     ...
 }
 
-# CALL main at very bottom, passing script args
-main "$@"
+# CALL main at very bottom, passing script args.
+# The test here distinguishes script execution from "source myscript.bash" which
+# will define the functions without calling main, for calling functions from
+# another script or testing at the command-line.
+[[ $BASH_SOURCE != "$0" ]] || main "$@"
 ```
 
 # Differences between pure-getopt and GNU getopt
