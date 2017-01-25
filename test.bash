@@ -20,6 +20,7 @@ evalcsh() {
     '
 }
 
+status=0
 want=$1
 num=1
 
@@ -37,7 +38,7 @@ test() {
       "$t"
   else
     (( num++ ))
-    return
+    return $status
   fi
 
   if [[ "$1 $2" == '-s csh' || "$1 $2" == '-s tcsh' ]]; then
@@ -74,6 +75,7 @@ test() {
       <(printf "EXIT: %s\nOUT: %s\nERR: %s\n" "$refstatus" "$refout" "$referr") \
       --label mine \
       <(printf "EXIT: %s\nOUT: %s\nERR: %s\n" "$mystatus" "$myout" "$myerr")
+    status=1
   fi
 }
 
@@ -181,5 +183,7 @@ if type tcsh &>/dev/null; then
   test -s csh -o xy:z:: --long=abc,def:,dez:: -- -x -y a\\b\ c
   test -s tcsh -o xy:z:: --long=abc,def:,dez:: -- -x -y a\\b\ c
 fi
+
+exit $status
 
 # vim:sw=2
