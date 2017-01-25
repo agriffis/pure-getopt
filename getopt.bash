@@ -448,23 +448,27 @@ getopt() {
     cat <<-EOT >&2
 	
 	Usage:
-	 getopt optstring parameters
-	 getopt [options] [--] optstring parameters
-	 getopt [options] -o|--options optstring [options] [--] parameters
+	 getopt <optstring> <parameters>
+	 getopt [options] [--] <optstring> <parameters>
+	 getopt [options] -o|--options <optstring> [options] [--] <parameters>
+	
+	Parse command options.
 	
 	Options:
-	 -a, --alternative            Allow long options starting with single -
-	 -h, --help                   This small usage guide
-	 -l, --longoptions <longopts> Long options to be recognized
-	 -n, --name <progname>        The name under which errors are reported
-	 -o, --options <optstring>    Short options to be recognized
-	 -q, --quiet                  Disable error reporting by getopt(3)
-	 -Q, --quiet-output           No normal output
-	 -s, --shell <shell>          Set shell quoting conventions
-	 -T, --test                   Test for getopt(1) version
-	 -u, --unquote                Do not quote the output
-	 -V, --version                Output version information
+	 -a, --alternative             allow long options starting with single -
+	 -l, --longoptions <longopts>  the long options to be recognized
+	 -n, --name <progname>         the name under which errors are reported
+	 -o, --options <optstring>     the short options to be recognized
+	 -q, --quiet                   disable error reporting by getopt(3)
+	 -Q, --quiet-output            no normal output
+	 -s, --shell <shell>           set quoting conventions to those of <shell>
+	 -T, --test                    test for getopt(1) version
+	 -u, --unquoted                do not quote the output
 	
+	 -h, --help     display this help and exit
+	 -V, --version  output version information and exit
+	
+	For more details see getopt(1).
 	EOT
   }
 
