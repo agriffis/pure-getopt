@@ -77,6 +77,9 @@ test() {
       <(printf "EXIT: %s\nOUT: %s\nERR: %s\n" "$mystatus" "$myout" "$myerr")
     status=1
   fi
+
+  # These get stuck
+  unset GETOPT_COMPATIBLE POSIXLY_CORRECT
 }
 
 title() {
@@ -153,6 +156,23 @@ test -a -o xy:z:: --long=abc,def:,dez:: -- -de foo
 title "Quoting long arguments"
 
 test -o xy:z:: --long=abc,def:,dez:: -- -y "$(head -n 200 getopt.bash)"
+
+title "GETOPT_COMPATIBLE and POSIXLY_CORRECT"
+
+# Baseline reorders options before non-option params: -x -y -- foo
+test -o xy -- -x foo -y
+# Leading dash doesn't reorder: -x foo -y
+test -o -xy -- -x foo -y
+# ..except in compatibility mode: -x -y -- foo
+GETOPT_COMPATIBLE= test -xy -x foo -y
+# Leading plus does POSIXLY_CORRECT: -x -- foo -y
+test -o +xy -- -x foo -y
+POSIXLY_CORRECT= test -o xy -- -x foo -y
+POSIXLY_CORRECT= test -o +xy -- -x foo -y
+# ..except in compatibility mode: -x -y -- foo
+GETOPT_COMPATIBLE= test +xy -x foo -y
+# and POSIXLY_CORRECT overrides GETOPT_COMPATIBLE: -x -- foo -y
+GETOPT_COMPATIBLE= POSIXLY_CORRECT= test xy -x foo -y
 
 title "Error getopt invocations"
 
