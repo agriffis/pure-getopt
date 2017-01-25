@@ -82,6 +82,12 @@ test() {
   unset GETOPT_COMPATIBLE POSIXLY_CORRECT
 }
 
+test_no_status() {
+  declare ostatus=$status
+  test "$@"
+  status=$ostatus
+}
+
 title() {
   if [[ -z $want ]]; then
     echo
@@ -183,8 +189,8 @@ test --long=foo
 
 title "Getopt help"
 
-test -h
-test --help
+test_no_status -h
+test_no_status --help
 
 title "Getopt version with -T"
 
