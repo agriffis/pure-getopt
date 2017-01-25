@@ -13,10 +13,10 @@ getopt() {
   # distribute, sublicense, and/or sell copies of the Software, and to
   # permit persons to whom the Software is furnished to do so, subject to
   # the following conditions:
-  # 
+  #
   # The above copyright notice and this permission notice shall be included
   # in all copies or substantial portions of the Software.
-  # 
+  #
   # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
   # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
   # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -81,7 +81,7 @@ getopt() {
         (-h|--help)
           _getopt_help
           return 2  # as does GNU getopt
-          ;; 
+          ;;
 
         (-l|--longoptions)
           long="$long${long:+,}$2"
@@ -399,7 +399,7 @@ getopt() {
         return 2 ;;
       (1)
         printf '%s' "$matches"; return 0 ;;
-      (*) 
+      (*)
         [[ $flags == *q* ]] || \
         printf "$name: option %s is ambiguous; possibilities: %s\n" >&2 \
           "$(_getopt_quote "$q")" "$(_getopt_quote "${matches[@]}")"
