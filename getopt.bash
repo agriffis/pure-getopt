@@ -149,7 +149,7 @@ getopt() {
     if [[ $short == -* ]]; then
       # Leading dash means generate output in place rather than reordering,
       # unless we're already in compatibility mode.
-      [[ $flags == *c* ]] || flags=i$flgas
+      [[ $flags == *c* ]] || flags=i$flags
       short=${short#?}
     elif [[ $short == +* ]]; then
       # Leading plus means POSIXLY_CORRECT, unless we're already in

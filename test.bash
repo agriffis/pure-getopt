@@ -204,6 +204,13 @@ if type tcsh &>/dev/null; then
   test -s tcsh -o xy:z:: --long=abc,def:,dez:: -- -x -y a\\b\ c
 fi
 
+title "Regression tests"
+
+# Spelling error $flgas.
+# The bug causes -a (and any other flags) to be dropped.
+# https://github.com/agriffis/pure-getopt/issues/2
+test -a -o -xy:z:: --long=abc,def:,dez:: -- -ab
+
 exit $status
 
 # vim:sw=2
