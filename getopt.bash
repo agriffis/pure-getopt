@@ -211,14 +211,8 @@ getopt() {
           elif [[ ,"$long", == *,"${o#--}":,* ]]; then
             opts=( "${opts[@]}" "$o" "${1#*=}" )
           elif [[ ,"$long", == *,"${o#--}",* ]]; then
-            if $alt_recycled; then
-              # GNU getopt isn't self-consistent about whether it reports
-              # errors with a single dash or double dash in alternative
-              # mode, but in this case it reports with a single dash.
-              _getopt_err "$name: option '${o#-}' doesn't allow an argument"
-            else
-              _getopt_err "$name: option '$o' doesn't allow an argument"
-            fi
+            if $alt_recycled; then o=${o#-}; fi
+            _getopt_err "$name: option '$o' doesn't allow an argument"
             error=1
           else
             echo "getopt: assertion failed (1)" >&2
@@ -240,6 +234,7 @@ getopt() {
               shift
               opts=( "${opts[@]}" "$o" "$1" )
             else
+              if $alt_recycled; then o=${o#-}; fi
               _getopt_err "$name: option '$o' requires an argument"
               error=1
             fi
@@ -388,7 +383,7 @@ getopt() {
         matches=( "${matches[@]}" "$a" )
       elif [[ $flags == *a* && $q == -[^-]* && $a == -"$q"* ]]; then
         # Abbreviated alternative match.
-        matches=( "${matches[@]}" "$a" )
+        matches=( "${matches[@]}" "${a#-}" )
       fi
     done
     case ${#matches[@]} in
