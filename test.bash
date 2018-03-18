@@ -28,6 +28,7 @@ test() {
   declare myout myerr mynorm mystatus
   declare refout referr refnorm refstatus
   declare q=\' nl=$'\n' evalnorm=evalbash
+  declare tmp
 
   if [[ -z $want || $want -eq $num ]]; then
     declare t="$*"
@@ -67,6 +68,19 @@ test() {
     # Intentional difference between GNU getopt and pure-getopt:
     # gnu:  getopt: option '--x=foo' is ambiguous; possibilities: '--xy' '--xz'
     # pure: getopt: option '--x' is ambiguous; possibilities: '--xy' '--xz'
+    echo PASS
+  elif [[ "$1" == -a && \
+        "$mystatus" == "$refstatus" && \
+        "$mynorm" == "$refnorm" && \
+        ( "$myerr" == *ambiguous* || "$myerr" == *requires* ) ]] && \
+        tmp=${referr/=* is /$q is } && tmp=${tmp//--/-} && \
+        [[ "$myerr" == "$tmp" ]]; then
+    # GNU getopt reports errors inconsistently for alternative mode,
+    # sometimes with one dash, sometimes with two. It seems to depend on
+    # system libraries rather than the version of util-linux. We report
+    # with a single dash (since it's alternative mode), for example:
+    # gnu:  getopt: option '-de' is ambiguous; possibilities: '--def' '--dez'
+    # pure: getopt: option '-de' is ambiguous; possibilities: '-def' '-dez'
     echo PASS
   else
     echo FAIL
