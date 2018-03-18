@@ -4,7 +4,9 @@ language: bash
 env:
   - BASHES="bash2.05b bash3.0.16 bash3.2.48 bash4.2.45"
 before_install:
-  - echo | sudo add-apt-repository ppa:agriffis/bashes
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq $BASHES
+  - wget https://launchpad.net/~agriffis/+archive/ubuntu/bashes/+files/bash2.05b_2.05b-2_amd64.deb
+  - wget https://launchpad.net/~agriffis/+archive/ubuntu/bashes/+files/bash3.0.16_3.0.16-2_amd64.deb
+  - wget https://launchpad.net/~agriffis/+archive/ubuntu/bashes/+files/bash3.2.48_3.2.48-2_amd64.deb
+  - wget https://launchpad.net/~agriffis/+archive/ubuntu/bashes/+files/bash4.2.45_4.2.45-2_amd64.deb
+  - sudo dpkg -i bash*deb
 script: bash travis.bash
