@@ -73,18 +73,15 @@ either inconsequential or due to bugs in GNU getopt:
 
         getopt: option '--x=foo' is ambiguous; possibilities: '--xy' '--xz'
 
-    Pure-getopt considers this a bug in GNU getopt, since the value might
-    be very long and inappropriate for printing to the screen, and since
-    GNU getopt ordinarily omits the value in its error messages.
-    Pure-getopt's error message in this case is:
+    We consider this a bug in GNU getopt, since the value might be very
+    long and inappropriate for printing to the screen, and since GNU getopt
+    ordinarily omits the value in its error messages. Pure-getopt's error
+    message in this case is:
 
         getopt: option '--x' is ambiguous; possibilities: '--xy' '--xz'
 
  3. Pure-getopt uses a different method of quoting the output. The result
-    should be the same as GNU getopt when eval'd by the shell. If you find
-    a case where it's different, please report it as a bug!
-
- 4. Pure-getopt has a test suite; GNU getopt in util-linux does not.
+    is the same as GNU getopt when eval'd by the shell.
 
 # References
 
