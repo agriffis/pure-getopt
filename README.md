@@ -1,6 +1,6 @@
 # pure-getopt
 
-[![Build Status](https://secure.travis-ci.org/agriffis/pure-getopt.png?branch=master)](http://travis-ci.org/agriffis/pure-getopt)
+[![Build Status](https://secure.travis-ci.org/agriffis/pure-getopt.svg?branch=master)](http://travis-ci.org/agriffis/pure-getopt)
 
 pure-getopt is a drop-in replacement for GNU getopt, implemented in pure
 Bash compatible back to 2.05b. It makes no external calls and faithfully
