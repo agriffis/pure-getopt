@@ -262,7 +262,7 @@ getopt() {
                 (0)
                   # Unambiguous match. Let the long options parser handle
                   # it, with a flag to get the right error message.
-                  set -- "-$@"
+                  set -- "-$1" "${@:2}"
                   alt_recycled=true
                   continue ;;
                 (1)
@@ -389,14 +389,14 @@ getopt() {
     case ${#matches[@]} in
       (0)
         [[ $flags == *q* ]] || \
-        printf "$name: unrecognized option %s\n" >&2 \
+        printf "$name: unrecognized option %s\\n" >&2 \
           "$(_getopt_quote "$q")"
         return 2 ;;
       (1)
-        printf '%s' "$matches"; return 0 ;;
+        printf '%s' "${matches[0]}"; return 0 ;;
       (*)
         [[ $flags == *q* ]] || \
-        printf "$name: option %s is ambiguous; possibilities: %s\n" >&2 \
+        printf "$name: option %s is ambiguous; possibilities: %s\\n" >&2 \
           "$(_getopt_quote "$q")" "$(_getopt_quote "${matches[@]}")"
         return 1 ;;
     esac

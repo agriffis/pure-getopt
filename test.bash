@@ -11,6 +11,7 @@ evalbash() {
 }
 
 evalcsh() {
+  # shellcheck disable=SC2016
   ARGS=$1 tcsh -c '
     eval set argv = \( $ARGS:q \)
     echo $1:q
@@ -86,9 +87,9 @@ test() {
     echo FAIL
     diff -u \
       --label reference \
-      <(printf "EXIT: %s\nOUT: %s\nERR: %s\n" "$refstatus" "$refout" "$referr") \
+      <(printf 'EXIT: %s\nOUT: %s\nERR: %s\n' "$refstatus" "$refout" "$referr") \
       --label mine \
-      <(printf "EXIT: %s\nOUT: %s\nERR: %s\n" "$mystatus" "$myout" "$myerr")
+      <(printf 'EXIT: %s\nOUT: %s\nERR: %s\n' "$mystatus" "$myout" "$myerr")
     status=1
   fi
 
@@ -184,15 +185,15 @@ test -o xy -- -x foo -y
 # Leading dash doesn't reorder: -x foo -y
 test -o -xy -- -x foo -y
 # ..except in compatibility mode: -x -y -- foo
-GETOPT_COMPATIBLE= test -xy -x foo -y
+GETOPT_COMPATIBLE='' test -xy -x foo -y
 # Leading plus does POSIXLY_CORRECT: -x -- foo -y
 test -o +xy -- -x foo -y
-POSIXLY_CORRECT= test -o xy -- -x foo -y
-POSIXLY_CORRECT= test -o +xy -- -x foo -y
+POSIXLY_CORRECT='' test -o xy -- -x foo -y
+POSIXLY_CORRECT='' test -o +xy -- -x foo -y
 # ..except in compatibility mode: -x -y -- foo
-GETOPT_COMPATIBLE= test +xy -x foo -y
+GETOPT_COMPATIBLE='' test +xy -x foo -y
 # and POSIXLY_CORRECT overrides GETOPT_COMPATIBLE: -x -- foo -y
-GETOPT_COMPATIBLE= POSIXLY_CORRECT= test xy -x foo -y
+GETOPT_COMPATIBLE='' POSIXLY_CORRECT='' test xy -x foo -y
 
 title "Error getopt invocations"
 
@@ -211,7 +212,7 @@ title "Getopt version with -T"
 test -T
 GETOPT_COMPATIBLE=1 test -T
 # GETOPT_COMPATIBLE empty string should work too
-GETOPT_COMPATIBLE= test -T
+GETOPT_COMPATIBLE='' test -T
 
 title "Setting shell with -s"
 
