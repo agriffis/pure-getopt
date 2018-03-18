@@ -1,3 +1,5 @@
+sudo: required
+dist: precise
 language: bash
 env:
   - BASHES="bash2.05b bash3.0.16 bash3.2.48 bash4.2.45"
