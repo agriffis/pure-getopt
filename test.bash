@@ -178,6 +178,11 @@ title "Quoting long arguments"
 
 test -o xy:z:: --long=abc,def:,dez:: -- -y "$(head -n 200 getopt.bash)"
 
+title "Passing custom program name with -n or --name"
+
+test -o xy:z:: --long=abc,def:,dez:: -n custom -- -y
+test -o xy:z:: --long=abc,def:,dez:: --name custom -- -y
+
 title "GETOPT_COMPATIBLE and POSIXLY_CORRECT"
 
 # Baseline reorders options before non-option params: -x -y -- foo

@@ -60,7 +60,7 @@ getopt() {
     # First parse always uses flags=p since getopt always parses its own
     # arguments effectively in this mode.
     parsed=$(_getopt_parse getopt ahl:n:o:qQs:TuV \
-      alternative,help,longoptions:,name,options:,quiet,quiet-output,shell:,test,version \
+      alternative,help,longoptions:,name:,options:,quiet,quiet-output,shell:,test,version \
       p "$@")
     status=$?
     if [[ $status != 0 ]]; then
