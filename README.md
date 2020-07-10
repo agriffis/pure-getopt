@@ -20,23 +20,28 @@ reimplements GNU getopt features, including:
 
 pure-getopt provides a single bash function `getopt` that you can insert
 directly into your script. It should be defined before calling `getopt` from
-your code, so either place the definition above your code, or use the
-recommended pattern below.
+your code, so either place the definition above your code, or use this
+pattern (recommended):
 
 ```bash
 #!/bin/bash
 
 main() {
     declare argv
-    argv=$(getopt -o xy:z:: --long foo,bar:,baz:: -- "$@") || return
+    argv=$(getopt -o fb: --long foo,bar: -- "$@") || return
     eval "set -- $argv"
 
-    declare a
-    for a; do
-        case $a in
-            ...
+    declare foo=false bar=
+
+    while true; do
+        case $1 in
+            f|foo) foo=true ; shift ;;
+            b|bar) bar=$2 ; shift 2 ;;
+            --) break ;;
         esac
     done
+
+    # etc
 }
 
 # INSERT getopt function here
