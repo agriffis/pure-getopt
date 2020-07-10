@@ -2,9 +2,9 @@
 
 getopt() {
   # pure-getopt, a drop-in replacement for GNU getopt in pure Bash.
-  # version 1.4.3
+  # version 1.4.4
   #
-  # Copyright 2012-2018 Aron Griffis <aron@scampersand.com>
+  # Copyright 2012-2020 Aron Griffis <aron@scampersand.com>
   #
   # Permission is hereby granted, free of charge, to any person obtaining
   # a copy of this software and associated documentation files (the
@@ -122,7 +122,7 @@ getopt() {
           return 4 ;;
 
         (-V|--version)
-          echo "pure-getopt 1.4.3"
+          echo "pure-getopt 1.4.4"
           return 0 ;;
 
         (--)
