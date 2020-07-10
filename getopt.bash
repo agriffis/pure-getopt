@@ -37,7 +37,7 @@ getopt() {
     # "options -- parameters" on stdout.
 
     declare parsed status
-    declare short long name flags
+    declare short long='' name flags=''
     declare have_short=false
 
     # Synopsis from getopt man-page:
@@ -367,7 +367,7 @@ getopt() {
     # status 2.)  If there is no match at all, prints a message on stderr
     # and returns 2.
     declare a q="$1"
-    declare -a matches
+    declare -a matches=()
     shift
     for a; do
       if [[ $q == "$a" ]]; then
@@ -410,7 +410,7 @@ getopt() {
 
   _getopt_quote() {
     # Quotes arguments with single quotes, escaping inner single quotes
-    declare s space q=\'
+    declare s space='' q=\'
     for s; do
       printf "$space'%s'" "${s//$q/$q\\$q$q}"
       space=' '
