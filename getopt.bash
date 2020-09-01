@@ -37,7 +37,7 @@ getopt() {
     # "options -- parameters" on stdout.
 
     declare parsed status
-    declare short long= name flags=
+    declare short long='' name flags=''
     declare have_short=false
 
     # Synopsis from getopt man-page:
