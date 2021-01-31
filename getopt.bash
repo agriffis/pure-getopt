@@ -65,7 +65,7 @@ getopt() {
     status=$?
     if [[ $status != 0 ]]; then
       if [[ $status == 1 ]]; then
-        echo "Try \`getopt --help' for more information." >&2
+        echo "Try 'getopt --help' for more information." >&2
         # Since this is the first parse, convert status 1 to 2
         status=2
       fi
@@ -80,7 +80,7 @@ getopt() {
 
         (-h|--help)
           _getopt_help
-          return 2  # as does GNU getopt
+          return 0
           ;;
 
         (-l|--longoptions)
@@ -110,7 +110,7 @@ getopt() {
               flags=t$flags ;;
             (*)
               echo 'getopt: unknown shell after -s or --shell argument' >&2
-              echo "Try \`getopt --help' for more information." >&2
+              echo "Try 'getopt --help' for more information." >&2
               return 2 ;;
           esac
           shift ;;
@@ -138,7 +138,7 @@ getopt() {
       # This implies the second form in the synopsis.
       if [[ $# == 0 ]]; then
         echo 'getopt: missing optstring argument' >&2
-        echo "Try \`getopt --help' for more information." >&2
+        echo "Try 'getopt --help' for more information." >&2
         return 2
       fi
       short=$1
@@ -440,15 +440,15 @@ getopt() {
   }
 
   _getopt_help() {
-    cat <<-EOT >&2
-	
+    cat <<-EOT
+
 	Usage:
 	 getopt <optstring> <parameters>
 	 getopt [options] [--] <optstring> <parameters>
 	 getopt [options] -o|--options <optstring> [options] [--] <parameters>
-	
+
 	Parse command options.
-	
+
 	Options:
 	 -a, --alternative             allow long options starting with single -
 	 -l, --longoptions <longopts>  the long options to be recognized
@@ -459,10 +459,10 @@ getopt() {
 	 -s, --shell <shell>           set quoting conventions to those of <shell>
 	 -T, --test                    test for getopt(1) version
 	 -u, --unquoted                do not quote the output
-	
-	 -h, --help     display this help and exit
-	 -V, --version  output version information and exit
-	
+
+	 -h, --help                    display this help
+	 -V, --version                 display version
+
 	For more details see getopt(1).
 	EOT
   }

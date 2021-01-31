@@ -43,6 +43,15 @@ test() {
     return $status
   fi
 
+  if [[ $1 == -s ]]; then
+    if [[ $2 == csh || $2 == tcsh ]]; then
+      evalnorm=evalcsh
+    elif [[ $2 == none ]]; then
+      evalnorm='printf %s'
+      shift 2
+    fi
+  fi
+
   if [[ "$1 $2" == '-s csh' || "$1 $2" == '-s tcsh' ]]; then
     evalnorm=evalcsh
   fi
@@ -61,6 +70,12 @@ test() {
         "$mynorm" == "$refnorm" && \
         "$myerr" == "$referr" ]]
   then
+    echo PASS
+  elif [[ "$mystatus" == "$refstatus" && \
+        "$mynorm" == "$refnorm" && \
+        "$myerr" == *"Try 'getopt --help"* && \
+        "$myerr" == "${referr/\`/\'}" ]]; then
+    # Older GNU getopt used a backquote in error message.
     echo PASS
   elif [[ "$mystatus" == "$refstatus" && \
         "$mynorm" == "$refnorm" && \
@@ -97,10 +112,8 @@ test() {
   unset GETOPT_COMPATIBLE POSIXLY_CORRECT
 }
 
-test_no_status() {
-  declare ostatus=$status
-  test "$@"
-  status=$ostatus
+test_no_eval() {
+  test -s none "$@"
 }
 
 title() {
@@ -207,10 +220,22 @@ test -o
 test --
 test --long=foo
 
-title "Getopt help"
+# Only check --help against latest version
+getopt_version=$(command getopt --version 2>&1)
+getopt_version=${getopt_version##* }
+if [[ $getopt_version != *.* ]]; then
+  echo "can't figure out getopt version" >&2
+  status=1
+else
+  reference_version=2.36.1
+  if [[ $(printf '%s\n%s\n' "$getopt_version" "$reference_version" | \
+        sort --version-sort | head -n1) == "$reference_version" ]]; then
+    title "Getopt help"
 
-test_no_status -h
-test_no_status --help
+    test_no_eval -h
+    test_no_eval --help
+  fi
+fi
 
 title "Getopt version with -T"
 
