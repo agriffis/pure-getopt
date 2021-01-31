@@ -1,5 +1,3 @@
-#!/bin/bash
-
 getopt() {
   # pure-getopt, a drop-in replacement for GNU getopt in pure Bash.
   # version 1.4.4
@@ -490,5 +488,3 @@ getopt() {
     _getopt_version_check
   return $status
 }
-
-# vim:sw=2
