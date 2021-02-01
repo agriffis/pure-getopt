@@ -1,6 +1,6 @@
 # pure-getopt
 
-[![Build Status](https://secure.travis-ci.org/agriffis/pure-getopt.svg?branch=master)](http://travis-ci.org/agriffis/pure-getopt)
+[![Build Status](https://travis-ci.com/agriffis/pure-getopt.svg?branch=master)](https://travis-ci.com/github/agriffis/pure-getopt)
 
 pure-getopt is a drop-in replacement for GNU getopt, implemented in pure
 Bash compatible back to 2.05b. It makes no external calls and faithfully
@@ -63,7 +63,7 @@ either inconsequential or due to bugs in GNU getopt:
 
  1. GNU getopt mishandles ambiguities in abbreviated long options, for
     example this doesn't produce an error message:
-    
+
         getopt -o '' --long xy,xz -- --x
 
     but this does produce an error message:
